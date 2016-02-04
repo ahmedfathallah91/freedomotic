@@ -21,13 +21,18 @@ package com.freedomotic.plugins.devices.hello;
 
 import com.freedomotic.api.EventTemplate;
 import com.freedomotic.api.Protocol;
+import com.freedomotic.events.MessageEvent;
 import com.freedomotic.exceptions.UnableToExecuteException;
 import com.freedomotic.things.EnvObjectLogic;
 import com.freedomotic.things.ThingRepository;
 import com.freedomotic.reactions.Command;
 import com.google.inject.Inject;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.logging.Logger;
+import javax.swing.JFrame;
 
 public class HelloWorld
         extends Protocol {
@@ -68,14 +73,27 @@ public class HelloWorld
 
     @Override
     protected void onRun() {
-        for (EnvObjectLogic thing : thingsRepository.findAll()) {
+        /*
+        //get and format the current date and time
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+        //create a freedomotic message event
+        MessageEvent message = new MessageEvent(null, "Hello world plugins says current time is " + dateFormat.format(date));
+        notifyEvent(message);
+        */
+        /*for (EnvObjectLogic thing : thingsRepository.findAll()) {
             LOG.info("HelloWorld sees Thing: " + thing.getPojo().getName());
-        }
+        }*/
+        
     }
 
     @Override
     protected void onStart() {
         LOG.info("HelloWorld plugin is started");
+
+        Ontology_Fenetre fenetre = new Ontology_Fenetre();
+        fenetre.setVisible(true);
+        fenetre.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
     }
 
     @Override
