@@ -5,6 +5,11 @@
  */
 package com.freedomotic.plugins.devices.hello;
 
+import com.hp.hpl.jena.rdf.model.Model;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -18,6 +23,9 @@ public class Ontology_Fenetre extends javax.swing.JFrame {
     /**
      * Creates new form Ontology_Fenetre
      */
+    
+    Model model;
+            
     public Ontology_Fenetre() {
         initComponents();
     }
@@ -46,8 +54,13 @@ public class Ontology_Fenetre extends javax.swing.JFrame {
         jButton2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+        });
 
-        jButton1.setText("Charger le fichier d'ontology");
+        jButton1.setText("Charger le fichier d'ontologie");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -62,16 +75,21 @@ public class Ontology_Fenetre extends javax.swing.JFrame {
         jTextArea2.setRows(5);
         jScrollPane2.setViewportView(jTextArea2);
 
+        jLabel1.setFont(new java.awt.Font("Ubuntu", 1, 15)); // NOI18N
         jLabel1.setText("Règles");
 
+        jLabel2.setFont(new java.awt.Font("Ubuntu", 1, 15)); // NOI18N
         jLabel2.setText("Requête");
 
         jTextField1.setEditable(false);
 
+        jLabel3.setFont(new java.awt.Font("Ubuntu", 1, 15)); // NOI18N
         jLabel3.setText("NameSpace");
 
+        jLabel4.setFont(new java.awt.Font("Ubuntu", 1, 15)); // NOI18N
         jLabel4.setText("Résultat");
 
+        jTextArea3.setEditable(false);
         jTextArea3.setBackground(java.awt.Color.darkGray);
         jTextArea3.setColumns(20);
         jTextArea3.setForeground(java.awt.Color.white);
@@ -93,6 +111,9 @@ public class Ontology_Fenetre extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
+                        .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())
+                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel3)
@@ -101,18 +122,16 @@ public class Ontology_Fenetre extends javax.swing.JFrame {
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel2)
-                                    .addComponent(jButton1)
                                     .addComponent(jLabel1))
                                 .addGap(0, 0, Short.MAX_VALUE)))
                         .addGap(12, 12, 12))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton2)
-                        .addContainerGap())
+                        .addGap(0, 647, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 526, Short.MAX_VALUE)
+                            .addComponent(jButton2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane2))
                         .addContainerGap())))
@@ -135,12 +154,12 @@ public class Ontology_Fenetre extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(jButton2))
+                .addComponent(jButton2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
@@ -156,12 +175,41 @@ public class Ontology_Fenetre extends javax.swing.JFrame {
             dialogue.showOpenDialog(null);
              
             // récupération du fichier sélectionné
-            System.out.println("Fichier choisi : " + dialogue.getSelectedFile());
+            String inputDataFile = dialogue.getSelectedFile().toString();
+            //System.out.println("Fichier choisi : " + dialogue.getSelectedFile());
+            model = JenaEngine.readModel(inputDataFile);
+            jTextField1.setText(model.getNsPrefixURI(""));
+            
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
+        try(PrintWriter out = new PrintWriter("rules.txt")){
+            out.println(jTextArea1.getText());
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Ontology_Fenetre.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        Model inferedModel = JenaEngine.readInferencedModelFromRule(model, "rules.txt");
+        //query on the model
+        jTextArea3.setText(JenaEngine.executeQuery(inferedModel, jTextArea2.getText()));
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        // TODO add your handling code here:
+        jTextArea1.append("@prefix ns: <http://www.semanticweb.org/ahmed/ontologies/2016/0/projet_gda#>.\n");
+        jTextArea1.append("@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.\n");
+        jTextArea1.append("@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.\n");
+        jTextArea1.append("@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.\n");
+        jTextArea1.append("\n");
+        
+        jTextArea2.append("PREFIX ns: <http://www.semanticweb.org/ahmed/ontologies/2016/0/projet_gda#>\n");
+        jTextArea2.append("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n");
+        jTextArea2.append("PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n");
+        jTextArea2.append("PREFIX owl: <http://www.w3.org/2002/07/owl#>\n");
+        jTextArea2.append("PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n");
+        jTextArea2.append("PREFIX tg:<http://www.turnguard.com/functions#>\n");
+        jTextArea2.append("\n");
+    }//GEN-LAST:event_formWindowOpened
 
     /**
      * @param args the command line arguments
